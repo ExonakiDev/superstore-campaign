@@ -33,14 +33,16 @@ def bin_column(df_input: pd.DataFrame, column_name: str, num_bins: int, min_val 
     if max_val is None:
         max_val = float(df[column_name].max())
 
-    print(f"min value in column {column_name}: {min_val}")
-    print(f"max value in column {column_name}: {max_val}")
+    print(f"min value in col: {min_val}")
+    print(f"max value in col: {max_val}")
     
     col_range = max_val - min_val
-    len_of_bin = (max_val / num_bins) + 1
-    bins = [len_of_bin*num_bin for num_bin in range(num_bins + 1)]
-    df[column_name] = pd.cut(df[column_name], bins)
+    len_of_bin = (col_range / num_bins) + 1
+    
+    bins = [(min_val + (len_of_bin*num_bin)) for num_bin in range(num_bins + 1)]
 
-    df[column_name] = df[column_name].factorize()[0]
+    df[column_name + "_bin"] = pd.cut(df[column_name], bins, include_lowest=True)
 
+    print(df[column_name + "_bin"].value_counts())
+    
     return df
