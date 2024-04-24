@@ -1,10 +1,10 @@
-from typing import Tuple
+from typing import Tuple, List
 
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
-from data_helpers import bin_column
+from data_helpers import bin_column, auto_bin_column
 
 def calculate_woe_iv(df: pd.DataFrame, x_col: str, y_col: str) -> Tuple[float, float]:
     """
@@ -45,7 +45,7 @@ def calculate_woe_iv(df: pd.DataFrame, x_col: str, y_col: str) -> Tuple[float, f
 
     return woe, iv
 
-def generate_woe_graph(df_input: pd.DataFrame, column_name: str, y_col: str, num_bins: str) -> pd.DataFrame:
+def generate_woe_graph(df_input: pd.DataFrame, column_name: str, y_col: str, num_bins: str, manual_bins: List[float] = None) -> pd.DataFrame:
     df = df_input[[column_name, y_col]].copy()
     df.dropna(inplace=True)
     
@@ -55,6 +55,10 @@ def generate_woe_graph(df_input: pd.DataFrame, column_name: str, y_col: str, num
     total_bad = len(df[df[y_col] == 0])
     
     binned_df = bin_column(df, column_name, num_bins)
+
+    # if manual_bins arg provided, it overrides auto bins
+    binned_df = bin_column(df, column_name, manual_bins)
+
     sorted_bins = binned_df[column_name + "_bin"].unique().sort_values()
 
     # calculate WOE for each of the bins
