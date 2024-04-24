@@ -1,6 +1,8 @@
 """
 This module serves as a place to declare helper functions and classes that assist in cleaning or manipulating the data.
 """
+from typing import List
+
 import pandas as pd
 
 # function to filter outliers
@@ -22,7 +24,7 @@ def filter_outliers(df: pd.DataFrame, column_name: str, min_value, max_value) ->
 
 
 
-def bin_column(df_input: pd.DataFrame, column_name: str, num_bins: int, min_val = None, max_val = None):
+def auto_bin_column(df_input: pd.DataFrame, column_name: str, num_bins: int, min_val = None, max_val = None):
     """
     Function for easy binning of columns based on number of bins, min val and max val
     """
@@ -40,6 +42,20 @@ def bin_column(df_input: pd.DataFrame, column_name: str, num_bins: int, min_val 
     len_of_bin = (col_range / num_bins) + 1
     
     bins = [(min_val + (len_of_bin*num_bin)) for num_bin in range(num_bins + 1)]
+
+    df[column_name + "_bin"] = pd.cut(df[column_name], bins, include_lowest=True)
+
+    print(df[column_name + "_bin"].value_counts())
+    
+    return df
+
+
+def bin_column(df_input: pd.DataFrame, column_name: str, bins: List[float]):
+    """
+    Function for easy binning of columns based on manual bins provided by user
+    (Probably can be combined with the other function, but separate right now)
+    """
+    df = df_input.copy()
 
     df[column_name + "_bin"] = pd.cut(df[column_name], bins, include_lowest=True)
 
