@@ -84,3 +84,38 @@ def generate_woe_graph(df_input: pd.DataFrame, column_name: str, y_col: str, num
     plt.show()
 
     return plot_df
+
+def generate_woe_graph_manual_bins(df_input: pd.DataFrame, column_name: str, y_col: str, bins: List[float]) -> pd.DataFrame:
+    df = df_input[[column_name, y_col]].copy()
+    df.dropna(inplace=True)
+    
+    plot_list = []
+
+    total_good = len(df[df[y_col] == 1])
+    total_bad = len(df[df[y_col] == 0])
+    
+    binned_df = bin_column(df, column_name, bins)
+    sorted_bins = binned_df[column_name + "_bin"].unique().sort_values()
+
+    # calculate WOE for each of the bins
+    for s_bin in sorted_bins:
+        subset_data = binned_df.loc[binned_df[column_name + "_bin"] == s_bin]
+        
+        good_dist = (len(subset_data[subset_data[y_col] == 1]) + 0.5) / total_good
+        bad_dist = (len(subset_data[subset_data[y_col] == 0]) + 0.5) / total_bad
+
+        if good_dist == 0 or bad_dist == 0:
+            continue
+            
+        woe = np.log(good_dist/bad_dist)
+        plot_list.append({"bin_name": s_bin, "woe": woe})
+
+    plot_df = pd.DataFrame(plot_list)
+
+    # generate plot
+    plot_df["bin_name"] = plot_df["bin_name"].apply(lambda x: x.right)
+    plt.plot(plot_df["bin_name"], plot_df["woe"])
+    plt.xlabel(column_name + "_bin")
+    plt.ylabel("WOE (Weight of Evidence)")
+    plt.show()
+    return plot_df
